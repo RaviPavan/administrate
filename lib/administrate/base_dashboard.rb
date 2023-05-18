@@ -52,6 +52,12 @@ module Administrate
     end
 
     def form_attributes(action = nil)
+      action =
+        case action
+        when "update" then "edit"
+        when "create" then "new"
+        else action
+        end
       specific_form_attributes_for(action) || self.class::FORM_ATTRIBUTES
     end
 
@@ -63,11 +69,12 @@ module Administrate
       self.class.const_get(cname) if self.class.const_defined?(cname)
     end
 
-    def permitted_attributes
-      form_attributes.map do |attr|
+    def permitted_attributes(action = nil)
+      form_attributes(action).map do |attr|
         attribute_types[attr].permitted_attribute(
           attr,
           resource_class: self.class.model,
+          action: action,
         )
       end.uniq
     end
