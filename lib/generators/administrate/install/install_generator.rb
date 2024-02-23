@@ -50,6 +50,10 @@ module Administrate
 
       private
 
+      def namespace
+        options[:namespace]
+      end
+
       def singular_dashboard_resources
         dashboard_resources.map(&:to_s).map(&:singularize)
       end

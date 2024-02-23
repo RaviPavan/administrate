@@ -65,6 +65,10 @@ module Administrate
 
       private
 
+      def namespace
+        options[:namespace]
+      end
+
       def attributes
         attrs = (
           klass.reflections.keys +
