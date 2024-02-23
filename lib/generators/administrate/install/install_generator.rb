@@ -18,7 +18,7 @@ module Administrate
 
       def run_routes_generator
         if dashboard_resources.none?
-          call_generator("administrate:routes", "--namespace", namespace)
+          call_generator("administrate:routes", "--namespace", admin_namespace)
           Rails.application.reload_routes!
         end
       end
@@ -26,14 +26,14 @@ module Administrate
       def create_dashboard_controller
         template(
           "application_controller.rb.erb",
-          "app/controllers/#{namespace}/application_controller.rb",
+          "app/controllers/#{admin_namespace}/application_controller.rb",
         )
       end
 
       def run_dashboard_generators
         singular_dashboard_resources.each do |resource|
           call_generator "administrate:dashboard", resource,
-            "--namespace", namespace
+            "--namespace", admin_namespace, "--no-routes"
         end
       end
 
@@ -45,7 +45,7 @@ module Administrate
 
       private
 
-      def namespace
+      def admin_namespace
         options[:namespace]
       end
 
@@ -54,7 +54,7 @@ module Administrate
       end
 
       def dashboard_resources
-        Administrate::Namespace.new(namespace).resources
+        Administrate::Namespace.new(admin_namespace).resources
       end
 
       def valid_dashboard_models
