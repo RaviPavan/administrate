@@ -55,7 +55,7 @@ module Administrate
       def admin_route
         return unless options[:routes]
 
-        routes   = File.exist?(Rails.root.join("config/routes/admin.rb") ? Rails.root.join("config/routes/admin.rb") : Rails.root.join("config/routes.rb")
+        routes   = File.exist?(Rails.root.join("config/routes/admin.rb")) ? Rails.root.join("config/routes/admin.rb") : Rails.root.join("config/routes.rb")
         content  = "resources :#{plural_route_name}\n"
         sentinel = /namespace :#{namespace}.*\n/
         indent   = File.binread(routes)[/\n(\s*)namespace :#{namespace}/, 1] || ""
