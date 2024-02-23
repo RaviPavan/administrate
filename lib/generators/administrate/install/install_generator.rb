@@ -14,11 +14,16 @@ module Administrate
       include Administrate::GeneratorHelpers
       source_root File.expand_path("../templates", __FILE__)
 
-      class_option :namespace, type: :string, default: "admin"
+      class_option(
+        :namespace,
+        type: :string,
+        desc: "Namespace where the admin dashboards will live",
+        default: "admin"
+      )
 
       def run_routes_generator
         if dashboard_resources.none?
-          call_generator("administrate:routes", "--namespace", admin_namespace)
+          call_generator("administrate:routes", "--namespace", namespace)
           Rails.application.reload_routes!
         end
       end
@@ -26,14 +31,14 @@ module Administrate
       def create_dashboard_controller
         template(
           "application_controller.rb.erb",
-          "app/controllers/#{admin_namespace}/application_controller.rb",
+          "app/controllers/#{namespace}/application_controller.rb"
         )
       end
 
       def run_dashboard_generators
         singular_dashboard_resources.each do |resource|
           call_generator "administrate:dashboard", resource,
-            "--namespace", admin_namespace, "--no-routes"
+            "--namespace", namespace, "--no-routes"
         end
       end
 
@@ -45,16 +50,12 @@ module Administrate
 
       private
 
-      def admin_namespace
-        options[:namespace]
-      end
-
       def singular_dashboard_resources
         dashboard_resources.map(&:to_s).map(&:singularize)
       end
 
       def dashboard_resources
-        Administrate::Namespace.new(admin_namespace).resources
+        Administrate::Namespace.new(namespace).resources
       end
 
       def valid_dashboard_models

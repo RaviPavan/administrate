@@ -8,7 +8,7 @@ class ProductDashboard < Administrate::BaseDashboard
     :description,
     :image_url,
     :product_meta_tag,
-    :release_year,
+    :release_year
   ]
 
   ATTRIBUTE_TYPES = {
@@ -19,10 +19,10 @@ class ProductDashboard < Administrate::BaseDashboard
     name: Field::String,
     pages: Field::HasMany,
     price: Field::Number.with_options(prefix: "$", decimals: 2),
-    product_meta_tag: Field::HasOne,
+    product_meta_tag: Field::HasOne.with_options(order: "meta_title"),
     release_year: Field::Select.with_options(
-      collection: -> { (Time.current.year - 10)..Time.current.year },
-    ),
+      collection: -> { (Time.current.year - 10)..Time.current.year }
+    )
   }
 
   COLLECTION_ATTRIBUTES = ATTRIBUTES

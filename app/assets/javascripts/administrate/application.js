@@ -1,4 +1,6 @@
-//= require jquery
-//= require jquery_ujs
-//= require selectize
-//= require_tree .
+import "./add_jquery";
+
+import "@hotwired/turbo-rails";
+import "selectize/dist/js/selectize.min.js";
+
+import "./controllers";

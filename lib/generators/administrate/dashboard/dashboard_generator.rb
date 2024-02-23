@@ -13,21 +13,26 @@ module Administrate
         time: "Field::Time",
         text: "Field::Text",
         string: "Field::String",
-        uuid: "Field::String",
+        uuid: "Field::String"
       }
 
       ATTRIBUTE_OPTIONS_MAPPING = {
         # procs must be defined in one line!
-        enum: {  searchable: false,
-                 collection: ->(field) { field.resource.class.send(field.attribute.to_s.pluralize).keys } },
-        float: { decimals: 2 },
+        enum: {searchable: false,
+               collection: ->(field) { field.resource.class.send(field.attribute.to_s.pluralize).keys }},
+        float: {decimals: 2}
       }
 
       DEFAULT_FIELD_TYPE = "Field::String.with_options(searchable: false)"
       COLLECTION_ATTRIBUTE_LIMIT = 4
       READ_ONLY_ATTRIBUTES = %w[id created_at updated_at]
 
-      class_option :namespace, type: :string, default: :admin
+      class_option(
+        :namespace,
+        type: :string,
+        desc: "Namespace where the admin dashboards live",
+        default: "admin"
+      )
       class_option :routes, type: :boolean, default: true, description: "Insert admin routes for resource"
 
       source_root File.expand_path("../templates", __FILE__)
@@ -35,13 +40,13 @@ module Administrate
       def create_dashboard_definition
         template(
           "dashboard.rb.erb",
-          Rails.root.join("app/dashboards/#{file_name}_dashboard.rb"),
+          Rails.root.join("app/dashboards/#{file_name}_dashboard.rb")
         )
       end
 
       def create_resource_controller
         destination = Rails.root.join(
-          "app/controllers/#{admin_namespace}/#{file_name.pluralize}_controller.rb",
+          "app/controllers/#{namespace}/#{file_name.pluralize}_controller.rb"
         )
 
         template("controller.rb.erb", destination)
@@ -52,17 +57,13 @@ module Administrate
 
         routes   = File.exist?(Rails.root.join("config/routes/admin.rb") ? Rails.root.join("config/routes/admin.rb") : Rails.root.join("config/routes.rb")
         content  = "resources :#{plural_route_name}\n"
-        sentinel = /namespace :#{admin_namespace}.*\n/
-        indent   = File.binread(routes)[/\n(\s*)namespace :#{admin_namespace}/, 1] || ""
+        sentinel = /namespace :#{namespace}.*\n/
+        indent   = File.binread(routes)[/\n(\s*)namespace :#{namespace}/, 1] || ""
 
         inject_into_file routes, indent + "  " + content, after: sentinel
       end
 
       private
-
-      def admin_namespace
-        options[:namespace]
-      end
 
       def attributes
         attrs = (
@@ -79,7 +80,7 @@ module Administrate
           primary_key,
           *attrs.sort,
           created_at,
-          updated_at,
+          updated_at
         ].compact
       end
 
@@ -127,7 +128,7 @@ module Administrate
 
       def enum_column?(attr)
         klass.respond_to?(:defined_enums) &&
-          klass.defined_enums.keys.include?(attr)
+          klass.defined_enums.key?(attr)
       end
 
       def column_types(attr)
