@@ -55,10 +55,15 @@ module Administrate
       def admin_route
         return unless options[:routes]
 
-        routes   = File.exist?(Rails.root.join("config/routes/admin.rb")) ? Rails.root.join("config/routes/admin.rb") : Rails.root.join("config/routes.rb")
-        content  = "resources :#{file_name.pluralize}\n"
+        ["config/routes/admin.rb", "config/routes.rb"].each do |path|
+          full_path = Rails.root.join(path)
+          routes = full_path if File.exists?(full_path)
+        end
+        return if routes.nil?
+
+        content = "resources :#{file_name.pluralize}\n"
         sentinel = /namespace :#{namespace}.*\n/
-        indent   = File.binread(routes)[/\n(\s*)namespace :#{namespace}/, 1] || ""
+        indent = File.binread(routes)[/\n(\s*)namespace :#{namespace}/, 1] || ""
 
         inject_into_file routes, indent + "  " + content, after: sentinel
       end
@@ -108,7 +113,7 @@ module Administrate
       end
 
       def attr_name(attribute)
-        attribute.gsub(/rich_text_/, '')
+        attribute.gsub("rich_text_", "")
       end
 
       def field_type(attribute)
